@@ -4,7 +4,16 @@ import os
 from datetime import datetime, timezone
 
 from .. import coc_api
-from ..derive import coverage, power_index, super_active_count, top_near_max, top_units_by_category
+from ..derive import (
+    coverage,
+    coverage_gaps,
+    power_index,
+    recommend_upgrades,
+    super_active_count,
+    top_donors_by_category,
+    top_near_max,
+    top_units_by_category,
+)
 from ..normalize import normalize_player
 
 
@@ -86,6 +95,16 @@ def main():
     th_values = [profile.get("th") for profile in profiles if profile.get("th")]
     th_avg = round(sum(th_values) / len(th_values), 2) if th_values else 0
 
+    coverage_by_cat = {
+        "troops": coverage(profiles, "troops"),
+        "spells": coverage(profiles, "spells"),
+        "heroes": coverage(profiles, "heroes"),
+        "heroEquipment": coverage(profiles, "heroEquipment"),
+    }
+    coverage_map = {
+        category: {item.get("unit"): item.get("coverageRate", 0) for item in rows}
+        for category, rows in coverage_by_cat.items()
+    }
     aggregates = {
         "thAvg": th_avg,
         "thDistribution": compute_th_distribution(profiles),
@@ -95,11 +114,22 @@ def main():
             "heroes": top_units_by_category(profiles, "heroes"),
             "heroEquipment": top_units_by_category(profiles, "heroEquipment"),
         },
-        "coverage": {
-            "troops": coverage(profiles, "troops"),
-            "spells": coverage(profiles, "spells"),
-            "heroes": coverage(profiles, "heroes"),
-            "heroEquipment": coverage(profiles, "heroEquipment"),
+        "coverage": coverage_by_cat,
+        "resources": {
+            "topDonors": {
+                "troops": top_donors_by_category(profiles, "troops"),
+                "spells": top_donors_by_category(profiles, "spells"),
+            },
+            "coverageGaps": {
+                "troops": coverage_gaps(coverage_by_cat["troops"]),
+                "spells": coverage_gaps(coverage_by_cat["spells"]),
+                "heroes": coverage_gaps(coverage_by_cat["heroes"]),
+                "heroEquipment": coverage_gaps(coverage_by_cat["heroEquipment"]),
+            },
+            "recommendations": recommend_upgrades(profiles, coverage_map),
+            "note": (
+                "Recomendaciones heurísticas basadas en cobertura (sin datos reales de laboratorio)."
+            ),
         },
     }
 

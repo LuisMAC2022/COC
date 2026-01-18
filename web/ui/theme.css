@@ -9,6 +9,7 @@
   --heat-high: #6d5ae6;
   --heat-mid: #4f7dff;
   --heat-low: #7ba9ff;
+  --coverage-low: #d49a3a;
 }
 
 * {
@@ -81,6 +82,10 @@ p {
   color: var(--muted);
 }
 
+.muted {
+  color: var(--muted);
+}
+
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -145,6 +150,56 @@ input[type="search"] {
   border-radius: 0.75rem;
 }
 
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.donor-list,
+.coverage-list,
+.recommendation-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.donor-list li {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.coverage-row {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.coverage-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.coverage-bar {
+  height: 10px;
+  background: var(--surface-light);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.coverage-bar span {
+  display: block;
+  height: 100%;
+  background: var(--coverage-low);
+}
+
+.recommendation-card h3 {
+  margin-bottom: 0.35rem;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -156,6 +211,7 @@ input[type="search"] {
   padding: 0.75rem 0.9rem;
   text-align: left;
   border-bottom: 1px solid #1e2742;
+  vertical-align: top;
 }
 
 .badge {
@@ -166,6 +222,7 @@ input[type="search"] {
   background: var(--surface-light);
   color: var(--muted);
   font-size: 0.75rem;
+  gap: 0.25rem;
 }
 
 .heat-high {
