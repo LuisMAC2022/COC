@@ -5,7 +5,7 @@ Backend local (Python): recolecta datos, normaliza, calcula métricas y guarda J
 
 Frontend estático (HTML/JS): solo visualiza y filtra; no depende de llamadas a la API.
 
-Carpeta data/ como cache/versionado por fecha para no re-fetch.
+Cache local en backend/cache/ con TTL y esquema de directorios por endpoint + fecha.
 
 Todo en módulos pequeños: fetch → normalize → derive → export.
 
@@ -151,23 +151,21 @@ Badges consistentes: super, near-max, low-coverage.
 A) Clan stats + perfiles por jugador (baseline)
 A0. Infraestructura mínima (bloquea todo lo demás)
 
-Crear backend/requirements.txt (requests, opcional pydantic si quieres validación).
+A0.1 Config y secretos
+- Crear backend/requirements.txt (requests, opcional pydantic si quieres validación).
+- Crear backend/config.example.json (clanTag, token env var, sleep, cache TTL).
+- Definir lectura de token por env var y validación al iniciar.
 
-Crear backend/config.example.json (clanTag, token env var, sleep, cache TTL).
+A0.2 Cliente de API + resiliencia
+- Implementar backend/coc_api.py
+- get_clan(tag), get_members(tag), get_player(tag), (opcional get_warlog(tag)).
+- Rate limiting: sleep_s.
+- Manejo de errores y reintentos 1 vez con backoff.
 
-Implementar backend/coc_api.py
-
-get_clan(tag), get_members(tag), get_player(tag), (opcional get_warlog(tag)).
-
-Rate limiting: sleep_s.
-
-Manejo de errores y reintentos 1 vez.
-
-Implementar cache simple:
-
-cache_get(key) / cache_set(key,json) con timestamp.
-
-TTL configurable.
+A0.3 Cache local (backend/cache)
+- Implementar cache_get(key) / cache_set(key,json) con timestamp.
+- TTL configurable.
+- Estructura de key: endpoint + fecha + tag.
 
 A1. Normalización canónica
 
@@ -205,23 +203,26 @@ Write backend/outputs/clan_snapshot.json
 
 A3. UI (web/pages/clan.html)
 
-web/ui/theme.css con clases heat, gap, discipline.
+A3.1 Estructura base
+- web/ui/theme.css con clases heat, gap, discipline.
+- web/pages/clan.html + web/app.js
 
-web/pages/clan.html + web/app.js
+A3.2 Vista de indicadores
+- KPI cards
+- Histograma TH (simple bar chart en canvas o HTML bars)
 
-KPI cards
-
-Histograma TH (simple bar chart en canvas o HTML bars)
-
-Tabla jugadores: powerIndex por cat + “near-max count”
-
-Search por nombre/tag
-
-Drill-down: modal perfil jugador (ya tienes patrón)
+A3.3 Vista por jugador
+- Tabla jugadores: powerIndex por cat + “near-max count”
+- Search por nombre/tag
+- Drill-down: modal perfil jugador (ya tienes patrón)
 
 Definition of Done A
 
 Genero clan_snapshot.json y lo visualizo sin guerra.
+
+Criterios de aceptación A
+- clan_snapshot.json incluye meta.generatedAt y aggregates.thAvg + thDistribution.
+- UI muestra KPI + histograma + tabla con búsqueda y no revienta si faltan campos opcionales.
 
 B) Guerra activa (scouting por rival + matchups)
 B1. Export war_active
@@ -238,21 +239,23 @@ Write backend/outputs/war_active.json
 
 B2. UI (web/pages/war.html)
 
-Reusar componentes de A (tabla, modal, heatmap).
+B2.1 Overview
+- Reusar componentes de A (tabla, modal, heatmap).
+- Vista 3 columnas: clan vs gaps vs oponente (como prototipo actual) leyendo war_active.json.
 
-Vista 3 columnas: clan vs gaps vs oponente (como prototipo actual) pero leyendo war_active.json.
-
-Vista “matchups por mapPosition”
-
-filas por posición
-
-celdas con mini powerIndex bars (troops/spells/heroes/equipment)
-
-botón “comparar A vs B” precargado (reusar compare modal del prototipo)
+B2.2 Matchups
+- Vista “matchups por mapPosition”
+- filas por posición
+- celdas con mini powerIndex bars (troops/spells/heroes/equipment)
+- botón “comparar A vs B” precargado (reusar compare modal del prototipo)
 
 Definition of Done B
 
 Cargo war_active.json, veo amenazas top, gaps y matchups.
+
+Criterios de aceptación B
+- Si no hay guerra activa, UI muestra estado vacío claro.
+- La vista de matchups no falla si falta mapPosition.
 
 C) Ejecución y MVP (actividad + score)
 C1. Derivación de ataques
@@ -275,15 +278,22 @@ Output: war_report.json con leaderboards y disciplina
 
 C3. UI (web/pages/execution.html)
 
-Tabla disciplina: ataques usados (0/1/2) con colores
+C3.1 Disciplina
+- Tabla disciplina: ataques usados (0/1/2) con colores
 
-Leaderboard MVP (explicable: estrellas, destrucción, up-hit)
+C3.2 MVP
+- Leaderboard MVP (explicable: estrellas, destrucción, up-hit)
 
-Scatter (delta promedio vs estrellas) para identificar “pegadores arriba”
+C3.3 Análisis
+- Scatter (delta promedio vs estrellas) para identificar “pegadores arriba”
 
 Definition of Done C
 
 Identifico rápido quién falta, quién es MVP y por qué.
+
+Criterios de aceptación C
+- Si no hay attacks[], se muestra una nota “timing aproximado” y no rompe UI.
+- MVP score incluye desglose por jugador.
 
 D) Recursos y progresión (donaciones + cobertura + coordinación)
 D1. Donaciones (no requiere endpoints extra)
@@ -304,15 +314,21 @@ sugerir unidad donde jugador esté cerca (0.85–0.95) y cobertura del clan sea 
 
 D2. UI (web/pages/resources.html)
 
-Tabla “Top donadores” por unidad (buscador de unidad)
+D2.1 Donadores
+- Tabla “Top donadores” por unidad (buscador de unidad)
 
-Barras de cobertura por categoría (Top 20 gaps)
+D2.2 Cobertura
+- Barras de cobertura por categoría (Top 20 gaps)
 
-Panel “recomendaciones” por jugador (lista corta, no spam)
+D2.3 Recomendaciones
+- Panel “recomendaciones” por jugador (lista corta, no spam)
 
 Definition of Done D
 
 Sé quién donar para X y qué unidades conviene priorizar sin redundancia.
+
+Criterios de aceptación D
+- Si no hay datos de laboratorio, el módulo explica la limitación y solo muestra recomendaciones heurísticas.
 
 4) Roadmap (orden exacto recomendado)
 
@@ -349,3 +365,18 @@ Medidas de “incertidumbre”:
 si no hay maxLevel, no contar en %max/powerIndex
 
 si no hay warlog, no prometer “recent performance”; mostrar solo wins/streak.
+
+7) Decisiones técnicas pendientes
+- ¿Usar paralelismo controlado para fetch de jugadores (batching) o mantener secuencial con cache?
+- ¿Validación de schema con pydantic/jsonschema o validación manual ligera?
+- ¿Formato de versionado de outputs (solo timestamp o versionado de schema)?
+
+8) Preguntas abiertas (antes de iniciar)
+- ¿Reglas exactas del “Threat-to-base checklist” (lista de hechizos/equipment y pesos)?
+- ¿Definición exacta de “amenaza dominante” y “gap por categoría”?
+- ¿Qué KPI reemplazan “actividad reciente” si warlog no está disponible?
+
+9) Validaciones con prototipo
+- Medir tiempo total de export_clan_snapshot para 50 miembros con TTL activa.
+- Verificar disponibilidad real de currentwar/warlog y campos opcionales.
+- Evaluar interpretabilidad del MVP score con usuarios.
