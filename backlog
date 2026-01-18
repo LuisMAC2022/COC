@@ -1,6 +1,10 @@
 Backlog implementable (secuencial A→D) con arquitectura, archivos, schemas y tareas
 Decisión de arquitectura (para evitar reescribir)
 
+Estado actual
+
+A (Clan stats + perfiles) implementado con backend/export_clan_snapshot.py y web/pages/clan.html.
+
 Backend local (Python): recolecta datos, normaliza, calcula métricas y guarda JSON “listo para UI”.
 
 Frontend estático (HTML/JS): solo visualiza y filtra; no depende de llamadas a la API.

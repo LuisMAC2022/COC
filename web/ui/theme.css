@@ -1,0 +1,173 @@
+:root {
+  color-scheme: light;
+  --bg: #0b1020;
+  --surface: #131a2e;
+  --surface-light: #1a2542;
+  --text: #f5f7ff;
+  --muted: #b7c2de;
+  --accent: #6ea0ff;
+  --heat-high: #6d5ae6;
+  --heat-mid: #4f7dff;
+  --heat-low: #7ba9ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  color: #000;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  z-index: 10;
+}
+
+header {
+  padding: 2rem 1.5rem 1rem;
+}
+
+main {
+  padding: 0 1.5rem 2rem;
+}
+
+section {
+  margin-bottom: 2rem;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 1rem;
+}
+
+p {
+  margin: 0 0 1rem;
+  color: var(--muted);
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.kpi-card {
+  background: var(--surface);
+  padding: 1rem;
+  border-radius: 0.75rem;
+}
+
+.kpi-card strong {
+  display: block;
+  font-size: 1.5rem;
+}
+
+.chart {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 40px;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.chart-bar {
+  height: 12px;
+  background: var(--surface-light);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.chart-bar span {
+  display: block;
+  height: 100%;
+  background: var(--heat-mid);
+  border-radius: inherit;
+}
+
+.table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+input[type="search"] {
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #2b3553;
+  background: var(--surface-light);
+  color: var(--text);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: var(--surface);
+  border-radius: 0.75rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.table th,
+.table td {
+  padding: 0.75rem 0.9rem;
+  text-align: left;
+  border-bottom: 1px solid #1e2742;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--surface-light);
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.heat-high {
+  color: #fff;
+  background: var(--heat-high);
+}
+
+.heat-mid {
+  color: #fff;
+  background: var(--heat-mid);
+}
+
+.heat-low {
+  color: #fff;
+  background: var(--heat-low);
+}
+
+.footer-note {
+  color: var(--muted);
+  font-size: 0.9rem;
+}

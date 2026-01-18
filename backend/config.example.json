@@ -1,0 +1,7 @@
+{
+  "clanTag": "#CLANTAG",
+  "tokenEnvVar": "COC_API_TOKEN",
+  "sleepSeconds": 0.25,
+  "cacheTtlSeconds": 3600,
+  "includeWarlog": false
+}
