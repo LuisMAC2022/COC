@@ -46,6 +46,22 @@ header {
   padding: 2rem 1.5rem 1rem;
 }
 
+nav {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+nav a {
+  text-decoration: none;
+  padding-bottom: 0.2rem;
+  border-bottom: 2px solid transparent;
+}
+
+nav a[aria-current="page"] {
+  border-color: var(--accent);
+}
+
 main {
   padding: 0 1.5rem 2rem;
 }
@@ -170,4 +186,149 @@ input[type="search"] {
 .footer-note {
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.war-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.panel {
+  background: var(--surface);
+  padding: 1rem;
+  border-radius: 0.75rem;
+}
+
+.threat-category,
+.gap-category {
+  margin-bottom: 1rem;
+}
+
+.threat-category h4,
+.gap-category h4 {
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+}
+
+.threat-list,
+.gap-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.threat-list li,
+.gap-items li {
+  display: grid;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.gap-items li {
+  grid-template-columns: 1fr auto;
+}
+
+.gap-positive {
+  background: #1d6d4a;
+  color: #fff;
+}
+
+.gap-negative {
+  background: #7c2f2f;
+  color: #fff;
+}
+
+.gap-neutral {
+  background: var(--surface-light);
+  color: var(--muted);
+}
+
+.power-bars {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.power-bars li {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.power-bars .bar {
+  display: block;
+  height: 8px;
+  background: var(--surface-light);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.power-bars .bar span {
+  display: block;
+  height: 100%;
+  background: var(--heat-mid);
+}
+
+.profile-card {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.cell-profile {
+  min-width: 260px;
+}
+
+.button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+}
+
+.button:focus {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.compare-dialog {
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.compare-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.dialog-content {
+  padding: 1.5rem;
+}
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.compare-panel {
+  background: var(--surface-light);
+  padding: 1rem;
+  border-radius: 0.75rem;
+}
+
+.empty-state {
+  color: var(--muted);
+  margin-top: 1rem;
 }
