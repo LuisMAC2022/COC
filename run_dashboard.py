@@ -47,9 +47,19 @@ def main() -> None:
             str(config_path),
         ]
     )
+    subprocess.check_call(
+        [
+            sys.executable,
+            "-m",
+            "backend.export.export_war_execution",
+            "--config",
+            str(config_path),
+        ]
+    )
 
     print("\nServidor listo en http://localhost:8000/web/pages/clan.html")
     print("War Active: http://localhost:8000/web/pages/war.html")
+    print("War Execution: http://localhost:8000/web/pages/war_execution.html")
     print("Presiona CTRL+C para detener el servidor.")
 
     subprocess.check_call([sys.executable, "-m", "http.server", "8000"])

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>War Execution | COC Analytics</title>
+    <link rel="stylesheet" href="../ui/theme.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido principal</a>
+    <header>
+      <p>COC Analytics</p>
+      <nav aria-label="Navegación principal">
+        <a href="clan.html">Clan Overview</a>
+        <a href="war.html">War Active</a>
+        <a href="war_execution.html" aria-current="page">War Execution</a>
+      </nav>
+      <h1>War Execution</h1>
+      <p>
+        Seguimiento de disciplina y rendimiento en la guerra activa: MVP explicable, timing
+        aproximado y evidencia de ataques.
+      </p>
+    </header>
+    <main id="contenido">
+      <section aria-labelledby="leaderboards-title">
+        <h2 id="leaderboards-title">Leaderboard de ejecución</h2>
+        <div class="leaderboard-grid" id="leaderboards"></div>
+      </section>
+      <section aria-labelledby="scatter-title">
+        <h2 id="scatter-title">Scatter de dificultad vs éxito</h2>
+        <figure class="scatter-figure">
+          <div
+            class="scatter"
+            id="scatter-plot"
+            role="img"
+            aria-label="Dispersión de delta promedio y estrellas promedio por jugador"
+          ></div>
+          <figcaption>
+            Eje X: delta promedio (positivo = ataques arriba). Eje Y: estrellas promedio.
+          </figcaption>
+        </figure>
+      </section>
+      <section aria-labelledby="discipline-title">
+        <h2 id="discipline-title">Disciplina de ataques</h2>
+        <div
+          class="table-wrap"
+          role="region"
+          aria-live="polite"
+          aria-label="Tabla de disciplina de ataques"
+        >
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Jugador</th>
+                <th scope="col">Ataques usados</th>
+                <th scope="col">Estrellas</th>
+                <th scope="col">Destrucción prom.</th>
+                <th scope="col">Delta prom.</th>
+              </tr>
+            </thead>
+            <tbody id="discipline-body"></tbody>
+          </table>
+        </div>
+      </section>
+      <section aria-labelledby="attacks-title">
+        <h2 id="attacks-title">Evidencia de ataques</h2>
+        <div
+          class="table-wrap"
+          role="region"
+          aria-live="polite"
+          aria-label="Tabla de ataques"
+        >
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Orden</th>
+                <th scope="col">Atacante</th>
+                <th scope="col">Defensor</th>
+                <th scope="col">Estrellas</th>
+                <th scope="col">Destrucción</th>
+                <th scope="col">Delta</th>
+                <th scope="col">MVP</th>
+              </tr>
+            </thead>
+            <tbody id="attacks-body"></tbody>
+          </table>
+        </div>
+      </section>
+      <p class="footer-note" id="data-note"></p>
+    </main>
+    <script src="../war_execution.js" defer></script>
+  </body>
+</html>
