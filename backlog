@@ -1,0 +1,351 @@
+Backlog implementable (secuencial A→D) con arquitectura, archivos, schemas y tareas
+Decisión de arquitectura (para evitar reescribir)
+
+Backend local (Python): recolecta datos, normaliza, calcula métricas y guarda JSON “listo para UI”.
+
+Frontend estático (HTML/JS): solo visualiza y filtra; no depende de llamadas a la API.
+
+Carpeta data/ como cache/versionado por fecha para no re-fetch.
+
+Todo en módulos pequeños: fetch → normalize → derive → export.
+
+0) Estructura de proyecto propuesta
+coc-analytics/
+  backend/
+    requirements.txt
+    config.example.json
+    cli.py
+    coc_api.py
+    models.py
+    normalize.py
+    derive.py
+    export/
+      export_clan_snapshot.py
+      export_active_war.py
+      export_war_report.py
+    cache/
+      (json por endpoint y fecha)
+    outputs/
+      clan_snapshot.json
+      war_active.json
+      war_report.json
+  web/
+    index.html
+    app.js
+    ui/
+      components.js
+      charts.js
+      theme.css
+    pages/
+      clan.html
+      war.html
+      execution.html
+      resources.html
+  README.md
+
+
+Reutilización clave
+
+models.py define schemas y helpers comunes (pct, powerIndex, coverage).
+
+normalize.py produce PlayerProfile canónico usado en A–D.
+
+derive.py genera agregados usados por todas las páginas.
+
+1) Schemas JSON (canónicos)
+1.1 PlayerProfile (núcleo)
+{
+  "tag": "#AAA",
+  "name": "Player",
+  "th": 16,
+  "expLevel": 250,
+  "clanTag": "#CLAN",
+  "categories": {
+    "troops": [{"name":"...","level":1,"maxLevel":1,"superActive":false}],
+    "spells": [],
+    "heroes": [],
+    "heroEquipment": []
+  },
+  "derived": {
+    "powerIndex": {"troops":0.87,"spells":0.92,"heroes":0.78,"heroEquipment":0.66},
+    "topNearMax": {
+      "troops": [{"name":"...","pct":0.98}],
+      "spells": [],
+      "heroes": [],
+      "heroEquipment": []
+    },
+    "superActiveCount": 2
+  }
+}
+
+1.2 ClanSnapshot (A, base para D)
+{
+  "meta": {"generatedAt":"ISO", "source":"api", "clanTag":"#..."},
+  "clan": {"tag":"#...","name":"...","members":50, "warWins":0, "warWinStreak":0, "warTies":0, "warLosses":0},
+  "members": [PlayerProfile...],
+  "aggregates": {
+    "thAvg": 14.2,
+    "thDistribution": [{"th":16,"count":12}, ...],
+    "topUnitsByCat": {
+      "troops": [{"unit":"...","strength":0.55,"avgPct":0.92,"availability":0.6}],
+      "spells": [],
+      "heroes": [],
+      "heroEquipment": []
+    },
+    "coverage": {
+      "troops": [{"unit":"...","coverage90":18,"avgPct":0.84}],
+      "spells": []
+    }
+  }
+}
+
+1.3 WarActive (B, inputs para C)
+{
+  "meta": {"generatedAt":"ISO","state":"inWar"},
+  "teams": [
+    {"side":"clan","tag":"#...","name":"...", "members":[{"tag":"#..","name":"..","mapPosition":1,"profile":PlayerProfile, "warMember":{"attacks":[]}}]},
+    {"side":"opponent", ...}
+  ],
+  "derived": {
+    "topThreats": {"clan": {...}, "opponent": {...}},
+    "gaps": {"troops":[{"unit":"...","gapPct":0.08}], "spells":[]}
+  }
+}
+
+1.4 WarReport (C, ejecución + MVP)
+{
+  "meta": {"generatedAt":"ISO","warId":"(hash)"},
+  "execution": {
+    "members": [
+      {
+        "tag":"#..","side":"clan","mapPosition":3,
+        "attacksUsed":2,
+        "starsEarned":5,
+        "avgDestruction":86.5,
+        "avgDelta": 1.0,
+        "mvpScore": 6.9,
+        "components": {"stars":5,"destruction":0.865,"upHit":0.15}
+      }
+    ],
+    "leaderboards": {"mvp":[...], "stars":[...], "discipline":[...]}
+  }
+}
+
+2) Tema visual (paleta y reglas globales)
+
+Potencia/amenaza (%max): morado/azul (más intenso = más amenaza).
+
+Gaps (ventaja/desventaja): verde (ventaja), rojo (desventaja).
+
+Disciplina/actividad: rojo reservado para “faltan ataques”, amarillo para “incompleto”.
+
+Cobertura baja (D): naranja suave (alerta operativa).
+
+Componentes reusables:
+
+Heatmap class: >=0.98, >=0.90, >=0.75, else none.
+
+Badges consistentes: super, near-max, low-coverage.
+
+3) Backlog por secciones con tareas numeradas
+A) Clan stats + perfiles por jugador (baseline)
+A0. Infraestructura mínima (bloquea todo lo demás)
+
+Crear backend/requirements.txt (requests, opcional pydantic si quieres validación).
+
+Crear backend/config.example.json (clanTag, token env var, sleep, cache TTL).
+
+Implementar backend/coc_api.py
+
+get_clan(tag), get_members(tag), get_player(tag), (opcional get_warlog(tag)).
+
+Rate limiting: sleep_s.
+
+Manejo de errores y reintentos 1 vez.
+
+Implementar cache simple:
+
+cache_get(key) / cache_set(key,json) con timestamp.
+
+TTL configurable.
+
+A1. Normalización canónica
+
+backend/normalize.py
+
+normalize_player(player_json) -> PlayerProfile
+
+Extraer solo home, categorías: troops/spells/heroes/heroEquipment
+
+De-dup por (name,village) y guardar maxLevel, superActive.
+
+backend/derive.py (reutilizable)
+
+pct(level,max)
+
+power_index(profile, cat) (mean %max)
+
+top_near_max(profile, cat, k=10, threshold=0.90)
+
+unit_strength(teamProfiles, cat) = avgPct * availability
+
+coverage(teamProfiles, cat) = coverage90 + avgPct
+
+A2. Export (salida para UI)
+
+backend/export/export_clan_snapshot.py
+
+Fetch clan meta + members list
+
+Fetch perfiles jugadores (paralelo no; secuencial con cache)
+
+Compute aggregates (thAvg, dist, topUnitsByCat, coverage)
+
+Write backend/outputs/clan_snapshot.json
+
+A3. UI (web/pages/clan.html)
+
+web/ui/theme.css con clases heat, gap, discipline.
+
+web/pages/clan.html + web/app.js
+
+KPI cards
+
+Histograma TH (simple bar chart en canvas o HTML bars)
+
+Tabla jugadores: powerIndex por cat + “near-max count”
+
+Search por nombre/tag
+
+Drill-down: modal perfil jugador (ya tienes patrón)
+
+Definition of Done A
+
+Genero clan_snapshot.json y lo visualizo sin guerra.
+
+B) Guerra activa (scouting por rival + matchups)
+B1. Export war_active
+
+backend/export/export_active_war.py
+
+Fetch currentwar del clan
+
+Para cada miembro en war, attach profile (PlayerProfile) via get_player
+
+Derivar topThreats por equipo y gaps por categoría
+
+Write backend/outputs/war_active.json
+
+B2. UI (web/pages/war.html)
+
+Reusar componentes de A (tabla, modal, heatmap).
+
+Vista 3 columnas: clan vs gaps vs oponente (como prototipo actual) pero leyendo war_active.json.
+
+Vista “matchups por mapPosition”
+
+filas por posición
+
+celdas con mini powerIndex bars (troops/spells/heroes/equipment)
+
+botón “comparar A vs B” precargado (reusar compare modal del prototipo)
+
+Definition of Done B
+
+Cargo war_active.json, veo amenazas top, gaps y matchups.
+
+C) Ejecución y MVP (actividad + score)
+C1. Derivación de ataques
+
+backend/derive.py agregar:
+
+extract_attacks(war_json) mapeando attackerTag -> attacks[]
+
+delta = attackerPos - defenderPos
+
+mvp_score(attack) y agregación por jugador
+
+C2. Export war_report
+
+backend/export/export_war_report.py
+
+Input: currentwar (o war_active.json)
+
+Output: war_report.json con leaderboards y disciplina
+
+C3. UI (web/pages/execution.html)
+
+Tabla disciplina: ataques usados (0/1/2) con colores
+
+Leaderboard MVP (explicable: estrellas, destrucción, up-hit)
+
+Scatter (delta promedio vs estrellas) para identificar “pegadores arriba”
+
+Definition of Done C
+
+Identifico rápido quién falta, quién es MVP y por qué.
+
+D) Recursos y progresión (donaciones + cobertura + coordinación)
+D1. Donaciones (no requiere endpoints extra)
+
+backend/derive.py:
+
+top_donors(profiles, unitName, cat) orden por level y %max
+
+donation_index opcional: ponderar nivel absoluto + near-max
+
+backend/derive.py:
+
+coverage_gaps = unidades con coverage90 bajo
+
+recommend_upgrades (heurístico) por jugador:
+
+sugerir unidad donde jugador esté cerca (0.85–0.95) y cobertura del clan sea baja
+
+D2. UI (web/pages/resources.html)
+
+Tabla “Top donadores” por unidad (buscador de unidad)
+
+Barras de cobertura por categoría (Top 20 gaps)
+
+Panel “recomendaciones” por jugador (lista corta, no spam)
+
+Definition of Done D
+
+Sé quién donar para X y qué unidades conviene priorizar sin redundancia.
+
+4) Roadmap (orden exacto recomendado)
+
+A0–A2 (backend canónico + clan_snapshot)
+
+A3 (clan dashboard)
+
+B1–B2 (war_active + war dashboard)
+
+C1–C3 (war_report + execution dashboard)
+
+D1–D2 (resources dashboard)
+
+5) Archivos a “tocar” desde tu prototipo actual
+
+Si quieres migración rápida sin reestructurar todo:
+
+Mantén tu index.html como web/pages/war.html.
+
+Extrae JS a web/app.js y CSS a web/ui/theme.css.
+
+Backend: reemplaza tu script único por backend/export/export_active_war.py + cache.
+
+6) Checklist de calidad (buenas prácticas)
+
+Cada export escribe outputs/*.json con meta.generatedAt.
+
+Nunca renderizar directamente respuestas de API; siempre pasar por normalize.
+
+UI no debe asumir campos opcionales; usar ?. y fallbacks.
+
+Medidas de “incertidumbre”:
+
+si no hay maxLevel, no contar en %max/powerIndex
+
+si no hay warlog, no prometer “recent performance”; mostrar solo wins/streak.
