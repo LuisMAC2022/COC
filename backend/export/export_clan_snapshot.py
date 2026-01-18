@@ -1,0 +1,132 @@
+import argparse
+import json
+import os
+from datetime import datetime, timezone
+
+from .. import coc_api
+from ..derive import coverage, power_index, super_active_count, top_near_max, top_units_by_category
+from ..normalize import normalize_player
+
+
+def load_config(path: str):
+    with open(path, "r", encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def build_profile(player_json: dict):
+    profile = normalize_player(player_json)
+    derived = {
+        "powerIndex": {
+            "troops": power_index(profile, "troops"),
+            "spells": power_index(profile, "spells"),
+            "heroes": power_index(profile, "heroes"),
+            "heroEquipment": power_index(profile, "heroEquipment"),
+        },
+        "topNearMax": {
+            "troops": top_near_max(profile, "troops"),
+            "spells": top_near_max(profile, "spells"),
+            "heroes": top_near_max(profile, "heroes"),
+            "heroEquipment": top_near_max(profile, "heroEquipment"),
+        },
+        "superActiveCount": super_active_count(profile),
+    }
+    profile["derived"] = derived
+    return profile
+
+
+def compute_th_distribution(profiles):
+    buckets = {}
+    for profile in profiles:
+        th = profile.get("th")
+        if th is None:
+            continue
+        buckets[th] = buckets.get(th, 0) + 1
+    distribution = [
+        {"th": th, "count": count} for th, count in sorted(buckets.items(), reverse=True)
+    ]
+    return distribution
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Export clan snapshot data")
+    parser.add_argument(
+        "--config",
+        default=os.path.join(os.path.dirname(__file__), "..", "config.example.json"),
+    )
+    parser.add_argument(
+        "--output",
+        default=os.path.join(os.path.dirname(__file__), "..", "outputs", "clan_snapshot.json"),
+    )
+    args = parser.parse_args()
+
+    config = load_config(args.config)
+    clan_tag = config.get("clanTag")
+    if not clan_tag:
+        raise RuntimeError("Config missing clanTag")
+
+    token = coc_api.read_token(config.get("tokenEnvVar", "COC_API_TOKEN"))
+    sleep_seconds = float(config.get("sleepSeconds", 0.25))
+    cache_ttl = int(config.get("cacheTtlSeconds", 3600))
+    cache_dir = os.path.join(os.path.dirname(__file__), "..", "cache")
+
+    clan = coc_api.get_clan(clan_tag, token, sleep_seconds, cache_dir, cache_ttl)
+    members = coc_api.get_members(clan_tag, token, sleep_seconds, cache_dir, cache_ttl)
+
+    profiles = []
+    for member in members:
+        profile_json = coc_api.get_player(
+            member.get("tag"), token, sleep_seconds, cache_dir, cache_ttl
+        )
+        profiles.append(build_profile(profile_json))
+
+    warlog = None
+    if config.get("includeWarlog"):
+        warlog = coc_api.get_warlog(clan_tag, token, sleep_seconds, cache_dir, cache_ttl)
+
+    th_values = [profile.get("th") for profile in profiles if profile.get("th")]
+    th_avg = round(sum(th_values) / len(th_values), 2) if th_values else 0
+
+    aggregates = {
+        "thAvg": th_avg,
+        "thDistribution": compute_th_distribution(profiles),
+        "topUnitsByCat": {
+            "troops": top_units_by_category(profiles, "troops"),
+            "spells": top_units_by_category(profiles, "spells"),
+            "heroes": top_units_by_category(profiles, "heroes"),
+            "heroEquipment": top_units_by_category(profiles, "heroEquipment"),
+        },
+        "coverage": {
+            "troops": coverage(profiles, "troops"),
+            "spells": coverage(profiles, "spells"),
+            "heroes": coverage(profiles, "heroes"),
+            "heroEquipment": coverage(profiles, "heroEquipment"),
+        },
+    }
+
+    clan_payload = {
+        "meta": {
+            "generatedAt": datetime.now(timezone.utc).isoformat(),
+            "source": "api",
+            "clanTag": clan_tag,
+        },
+        "clan": {
+            "tag": clan.get("tag"),
+            "name": clan.get("name"),
+            "members": clan.get("members"),
+            "warWins": clan.get("warWins"),
+            "warWinStreak": clan.get("warWinStreak"),
+            "warTies": clan.get("warTies"),
+            "warLosses": clan.get("warLosses"),
+            "warlog": warlog,
+        },
+        "members": profiles,
+        "aggregates": aggregates,
+    }
+
+    os.makedirs(os.path.dirname(args.output), exist_ok=True)
+    with open(args.output, "w", encoding="utf-8") as handle:
+        json.dump(clan_payload, handle, ensure_ascii=False, indent=2)
+
+
+if __name__ == "__main__":
+    main()

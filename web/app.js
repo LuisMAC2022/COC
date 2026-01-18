@@ -1,0 +1,133 @@
+const DATA_PATH = "../backend/outputs/clan_snapshot.json";
+
+const formatPct = (value) => `${Math.round(value * 100)}%`;
+
+const getHeatClass = (value) => {
+  if (value >= 0.98) return "heat-high";
+  if (value >= 0.9) return "heat-mid";
+  if (value >= 0.75) return "heat-low";
+  return "";
+};
+
+const createKpiCard = (label, value, note) => {
+  const card = document.createElement("div");
+  card.className = "kpi-card";
+  card.innerHTML = `
+    <span>${label}</span>
+    <strong>${value}</strong>
+    ${note ? `<small>${note}</small>` : ""}
+  `;
+  return card;
+};
+
+const renderKpis = (data) => {
+  const grid = document.getElementById("kpi-grid");
+  grid.innerHTML = "";
+  const clan = data.clan || {};
+  const aggregates = data.aggregates || {};
+  grid.appendChild(createKpiCard("TH promedio", aggregates.thAvg ?? "--"));
+  grid.appendChild(createKpiCard("Miembros", clan.members ?? "--"));
+  grid.appendChild(createKpiCard("War wins", clan.warWins ?? "--"));
+  grid.appendChild(createKpiCard("Streak", clan.warWinStreak ?? "--"));
+};
+
+const renderThChart = (data) => {
+  const chart = document.getElementById("th-chart");
+  chart.innerHTML = "";
+  const distribution = data.aggregates?.thDistribution ?? [];
+  const max = Math.max(...distribution.map((item) => item.count), 1);
+  distribution.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "chart-row";
+    row.setAttribute("role", "listitem");
+    row.innerHTML = `
+      <span>TH ${item.th}</span>
+      <div class="chart-bar"><span style="width:${(item.count / max) * 100}%"></span></div>
+      <span>${item.count}</span>
+    `;
+    chart.appendChild(row);
+  });
+};
+
+const renderPlayers = (players) => {
+  const body = document.getElementById("players-body");
+  body.innerHTML = "";
+  players.forEach((player) => {
+    const power = player.derived?.powerIndex || {};
+    const nearMax = player.derived?.topNearMax || {};
+    const nearCount = Object.values(nearMax).reduce(
+      (acc, list) => acc + (Array.isArray(list) ? list.length : 0),
+      0
+    );
+    const avgPower = [power.troops, power.spells, power.heroes, power.heroEquipment].filter(
+      (value) => typeof value === "number"
+    );
+    const avgValue = avgPower.length
+      ? avgPower.reduce((acc, value) => acc + value, 0) / avgPower.length
+      : 0;
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>
+        <strong>${player.name ?? "--"}</strong><br />
+        <small>${player.tag ?? ""}</small>
+      </td>
+      <td>${player.th ?? "--"}</td>
+      <td>
+        <span class="badge ${getHeatClass(avgValue)}">${formatPct(avgValue)}</span>
+      </td>
+      <td>${nearCount}</td>
+      <td>${player.derived?.superActiveCount ?? 0}</td>
+    `;
+    body.appendChild(row);
+  });
+};
+
+const filterPlayers = (players, query) => {
+  if (!query) return players;
+  const normalized = query.trim().toLowerCase();
+  return players.filter((player) => {
+    const name = player.name?.toLowerCase() ?? "";
+    const tag = player.tag?.toLowerCase() ?? "";
+    return name.includes(normalized) || tag.includes(normalized);
+  });
+};
+
+const updateDataNote = (data) => {
+  const note = document.getElementById("data-note");
+  const generatedAt = data.meta?.generatedAt;
+  const warlog = data.clan?.warlog ? "Warlog incluido." : "Warlog no disponible.";
+  note.textContent = generatedAt
+    ? `Última actualización: ${new Date(generatedAt).toLocaleString()}. ${warlog}`
+    : "Datos cargados.";
+};
+
+const loadData = async () => {
+  const response = await fetch(DATA_PATH);
+  if (!response.ok) {
+    throw new Error("No se pudo cargar clan_snapshot.json");
+  }
+  return response.json();
+};
+
+const init = async () => {
+  try {
+    const data = await loadData();
+    const players = data.members || [];
+    renderKpis(data);
+    renderThChart(data);
+    renderPlayers(players);
+    updateDataNote(data);
+
+    const search = document.getElementById("player-search");
+    search.addEventListener("input", (event) => {
+      const filtered = filterPlayers(players, event.target.value);
+      renderPlayers(filtered);
+    });
+  } catch (error) {
+    const note = document.getElementById("data-note");
+    note.textContent = error.message;
+  }
+};
+
+document.addEventListener("DOMContentLoaded", init);

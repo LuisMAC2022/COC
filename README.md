@@ -72,6 +72,17 @@ Feature detection: si warlog no está, degradar UI sin romper.
 
 Entregable A: dashboard “Clan Overview” + export clan_snapshot.json + componentes reutilizables (normalizador, calculador de %max, powerIndex, heatmap).
 
+Estado de implementación A
+
+Backend (export)
+- Configura backend/config.example.json (clanTag, token env var, TTL).
+- Exporta el snapshot con: python -m backend.export.export_clan_snapshot --config backend/config.example.json
+- El export crea backend/outputs/clan_snapshot.json con meta, clan, members y aggregates.
+
+Frontend (UI)
+- Abre web/pages/clan.html (sirve por HTTP) para ver KPI, histograma TH y tabla filtrable.
+- Lee el JSON desde backend/outputs/clan_snapshot.json y degrada si falta warlog.
+
 B) Análisis de guerra activa (scouting por matchups y amenazas)
 
 Objetivo: durante una guerra activa, entender rápidamente el rival y cada matchup, con foco en combate (heroes/equipment/army/spells/pets en troops).
