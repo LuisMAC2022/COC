@@ -1,4 +1,4 @@
-const DATA_PATH = "../backend/outputs/clan_snapshot.json";
+const DATA_PATH = "/backend/outputs/clan_snapshot.json";
 
 const formatPct = (value) => `${Math.round(value * 100)}%`;
 

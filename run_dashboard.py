@@ -48,11 +48,10 @@ def main() -> None:
         ]
     )
 
-    print("\nServidor listo en http://localhost:8000/pages/clan.html")
-    print("War Active: http://localhost:8000/pages/war.html")
+    print("\nServidor listo en http://localhost:8000/web/pages/clan.html")
+    print("War Active: http://localhost:8000/web/pages/war.html")
     print("Presiona CTRL+C para detener el servidor.")
 
-    os.chdir("web")
     subprocess.check_call([sys.executable, "-m", "http.server", "8000"])
 
 
