@@ -105,6 +105,23 @@ def get_warlog(
         return None
 
 
+def get_current_war(
+    clan_tag: str,
+    token: str,
+    sleep_seconds: float,
+    cache_dir: str,
+    ttl_seconds: int,
+):
+    return _get_cached(
+        "clans",
+        f"{clan_tag}/currentwar",
+        token,
+        sleep_seconds,
+        cache_dir,
+        ttl_seconds,
+    )
+
+
 def read_token(token_env_var: str) -> str:
     token = os.environ.get(token_env_var)
     if not token:

@@ -83,6 +83,16 @@ Frontend (UI)
 - Abre web/pages/clan.html (sirve por HTTP) para ver KPI, histograma TH y tabla filtrable.
 - Lee el JSON desde backend/outputs/clan_snapshot.json y degrada si falta warlog.
 
+Inicio rápido (punto de entrada único)
+
+1. Ejecuta `python run_dashboard.py`.
+2. Ingresa el token y el clan tag cuando se soliciten.
+3. El script exporta clan_snapshot.json y war_active.json y levanta un servidor local.
+
+URLs:
+- http://localhost:8000/pages/clan.html
+- http://localhost:8000/pages/war.html
+
 B) Análisis de guerra activa (scouting por matchups y amenazas)
 
 Objetivo: durante una guerra activa, entender rápidamente el rival y cada matchup, con foco en combate (heroes/equipment/army/spells/pets en troops).
