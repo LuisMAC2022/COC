@@ -25,9 +25,23 @@ const renderKpis = (data) => {
   grid.innerHTML = "";
   const clan = data.clan || {};
   const aggregates = data.aggregates || {};
+  const warWins = typeof clan.warWins === "number" ? clan.warWins : null;
+  const warTies = typeof clan.warTies === "number" ? clan.warTies : null;
+  const warLosses = typeof clan.warLosses === "number" ? clan.warLosses : null;
+  const canComputeWars =
+    typeof warWins === "number" &&
+    typeof warTies === "number" &&
+    typeof warLosses === "number";
+  const totalWars = canComputeWars ? warWins + warTies + warLosses : null;
+  const winRate =
+    typeof totalWars === "number" && totalWars > 0 ? formatPct(warWins / totalWars) : "--";
   grid.appendChild(createKpiCard("TH promedio", aggregates.thAvg ?? "--"));
   grid.appendChild(createKpiCard("Miembros", clan.members ?? "--"));
-  grid.appendChild(createKpiCard("War wins", clan.warWins ?? "--"));
+  grid.appendChild(createKpiCard("Guerras totales", totalWars ?? "--"));
+  grid.appendChild(createKpiCard("Victorias", warWins ?? "--"));
+  grid.appendChild(createKpiCard("% victorias", winRate));
+  grid.appendChild(createKpiCard("Empates", warTies ?? "--"));
+  grid.appendChild(createKpiCard("Derrotas", warLosses ?? "--"));
   grid.appendChild(createKpiCard("Streak", clan.warWinStreak ?? "--"));
 };
 
