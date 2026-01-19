@@ -253,6 +253,20 @@ input[type="search"] {
   vertical-align: top;
 }
 
+.player-top-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.player-top-list strong {
+  color: var(--muted);
+  font-weight: 600;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;

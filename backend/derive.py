@@ -52,6 +52,12 @@ def units_by_threshold(profile: Dict, category: str, threshold: float):
     return items
 
 
+def top_units_by_threshold(
+    profile: Dict, category: str, threshold: float, limit: int = 10
+):
+    return units_by_threshold(profile, category, threshold)[:limit]
+
+
 def super_active_troops(profile: Dict):
     return [
         {"name": unit.get("name"), "level": unit.get("level")}

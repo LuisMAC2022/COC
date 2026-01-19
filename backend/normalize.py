@@ -45,6 +45,7 @@ def normalize_player(player_json: dict) -> Dict:
         "categories": {
             "troops": _extract_units(player_json, "troops"),
             "spells": _extract_units(player_json, "spells"),
+            "pets": _extract_units(player_json, "pets"),
             "heroes": _extract_units(player_json, "heroes"),
             "heroEquipment": _extract_units(player_json, "heroEquipment"),
         },

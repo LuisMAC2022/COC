@@ -70,11 +70,7 @@ const renderPlayers = (players) => {
   body.innerHTML = "";
   players.forEach((player) => {
     const power = player.derived?.powerIndex || {};
-    const nearMax = player.derived?.topNearMax || {};
-    const nearCount = Object.values(nearMax).reduce(
-      (acc, list) => acc + (Array.isArray(list) ? list.length : 0),
-      0
-    );
+    const topResearch = player.derived?.topResearchByCat || {};
     const avgPower = [power.troops, power.spells, power.heroes, power.heroEquipment].filter(
       (value) => typeof value === "number"
     );
@@ -83,6 +79,21 @@ const renderPlayers = (players) => {
       : 0;
 
     const row = document.createElement("tr");
+    const formatUnit = (unit) => `${unit.name} (Nv. ${unit.level})`;
+    const renderTopList = (label, units) => {
+      const display = Array.isArray(units) && units.length
+        ? units.map(formatUnit).join(", ")
+        : "<span class=\"muted\">Sin datos</span>";
+      return `<li><strong>${label}:</strong> ${display}</li>`;
+    };
+    const topListHtml = `
+      <ul class="player-top-list">
+        ${renderTopList("Tropas", topResearch.troops)}
+        ${renderTopList("Mascotas", topResearch.pets)}
+        ${renderTopList("Hechizos", topResearch.spells)}
+      </ul>
+    `;
+
     row.innerHTML = `
       <td>
         <strong>${player.name ?? "--"}</strong><br />
@@ -92,7 +103,7 @@ const renderPlayers = (players) => {
       <td>
         <span class="badge ${getHeatClass(avgValue)}">${formatPct(avgValue)}</span>
       </td>
-      <td>${nearCount}</td>
+      <td>${topListHtml}</td>
       <td>${player.derived?.superActiveCount ?? 0}</td>
     `;
     body.appendChild(row);

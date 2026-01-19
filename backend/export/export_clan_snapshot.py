@@ -14,6 +14,7 @@ from ..derive import (
     top_donors_by_category,
     top_near_max,
     top_units_by_category,
+    top_units_by_threshold,
     units_by_threshold,
 )
 from ..normalize import normalize_player
@@ -29,8 +30,14 @@ def build_profile(player_json: dict):
     top_near_max_by_cat = {
         "troops": top_near_max(profile, "troops"),
         "spells": top_near_max(profile, "spells"),
+        "pets": top_near_max(profile, "pets"),
         "heroes": top_near_max(profile, "heroes"),
         "heroEquipment": top_near_max(profile, "heroEquipment"),
+    }
+    top_research_by_cat = {
+        "troops": top_units_by_threshold(profile, "troops", 0.8),
+        "pets": top_units_by_threshold(profile, "pets", 0.8),
+        "spells": top_units_by_threshold(profile, "spells", 0.8),
     }
     super_active_troops_count = super_active_count(profile)
     # Contract note: keep legacy keys (topNearMax, superActiveCount) for backward
@@ -45,6 +52,7 @@ def build_profile(player_json: dict):
         },
         "topNearMax": top_near_max_by_cat,
         "topNearMaxByCat": top_near_max_by_cat,
+        "topResearchByCat": top_research_by_cat,
         "nearMaxUnitsByCat": {
             "troops": units_by_threshold(profile, "troops", 0.9),
             "spells": units_by_threshold(profile, "spells", 0.9),
