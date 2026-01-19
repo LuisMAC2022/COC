@@ -71,10 +71,15 @@ const renderPlayers = (players) => {
   players.forEach((player) => {
     const power = player.derived?.powerIndex || {};
     const nearMax = player.derived?.topNearMax || {};
-    const nearCount = Object.values(nearMax).reduce(
-      (acc, list) => acc + (Array.isArray(list) ? list.length : 0),
-      0
-    );
+    const nearMaxNames = (nearMax.troops || [])
+      .map((unit) => unit.name)
+      .filter(Boolean)
+      .join(", ");
+    const superActiveNames = (player.categories?.troops || [])
+      .filter((unit) => unit.superActive)
+      .map((unit) => unit.name)
+      .filter(Boolean)
+      .join(", ");
     const avgPower = [power.troops, power.spells, power.heroes, power.heroEquipment].filter(
       (value) => typeof value === "number"
     );
@@ -92,8 +97,8 @@ const renderPlayers = (players) => {
       <td>
         <span class="badge ${getHeatClass(avgValue)}">${formatPct(avgValue)}</span>
       </td>
-      <td>${nearCount}</td>
-      <td>${player.derived?.superActiveCount ?? 0}</td>
+      <td>${nearMaxNames || "--"}</td>
+      <td>${superActiveNames || "--"}</td>
     `;
     body.appendChild(row);
   });
