@@ -284,6 +284,12 @@ input[type="search"] {
   font-size: 0.9rem;
 }
 
+.section-note {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin: 0 0 1rem;
+}
+
 .war-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
