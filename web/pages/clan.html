@@ -29,7 +29,14 @@
       </section>
       <section aria-labelledby="th-title">
         <h2 id="th-title">Distribución de Ayuntamiento</h2>
-        <div class="chart" id="th-chart" role="list"></div>
+        <div
+          class="histogram"
+          aria-label="Histograma de distribución de ayuntamientos. Eje X: ayuntamiento. Eje Y: jugadores."
+        >
+          <div class="histogram-y-label" aria-hidden="true">Jugadores</div>
+          <div class="histogram-bars" id="th-chart" role="list"></div>
+          <div class="histogram-x-label" aria-hidden="true">Ayuntamiento (TH)</div>
+        </div>
       </section>
       <section aria-labelledby="players-title">
         <h2 id="players-title">Perfiles por jugador</h2>
