@@ -18,11 +18,17 @@ def _extract_units(player_json: dict, key: str) -> List[dict]:
     for unit in player_json.get(key, []):
         if unit.get("village") != "home":
             continue
+        name = unit.get("name")
+        level = unit.get("level")
+        max_level = unit.get("maxLevel")
+        # Policy: drop units without maxLevel to avoid inconsistent near-max/max lists.
+        if not name or level is None or max_level is None:
+            continue
         units.append(
             {
-                "name": unit.get("name"),
-                "level": unit.get("level"),
-                "maxLevel": unit.get("maxLevel"),
+                "name": name,
+                "level": level,
+                "maxLevel": max_level,
                 "superActive": unit.get("superTroopIsActive", False),
             }
         )
