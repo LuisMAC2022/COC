@@ -26,6 +26,16 @@ def load_config(path: str):
 
 def build_profile(player_json: dict):
     profile = normalize_player(player_json)
+    top_near_max_by_cat = {
+        "troops": top_near_max(profile, "troops"),
+        "spells": top_near_max(profile, "spells"),
+        "heroes": top_near_max(profile, "heroes"),
+        "heroEquipment": top_near_max(profile, "heroEquipment"),
+    }
+    super_active_troops_count = super_active_count(profile)
+    # Contract note: keep legacy keys (topNearMax, superActiveCount) for backward
+    # compatibility while exposing the preferred names (topNearMaxByCat,
+    # superActiveTroopsCount). Frontend can migrate to the new keys without breaking.
     derived = {
         "powerIndex": {
             "troops": power_index(profile, "troops"),
@@ -33,12 +43,8 @@ def build_profile(player_json: dict):
             "heroes": power_index(profile, "heroes"),
             "heroEquipment": power_index(profile, "heroEquipment"),
         },
-        "topNearMax": {
-            "troops": top_near_max(profile, "troops"),
-            "spells": top_near_max(profile, "spells"),
-            "heroes": top_near_max(profile, "heroes"),
-            "heroEquipment": top_near_max(profile, "heroEquipment"),
-        },
+        "topNearMax": top_near_max_by_cat,
+        "topNearMaxByCat": top_near_max_by_cat,
         "nearMaxUnitsByCat": {
             "troops": units_by_threshold(profile, "troops", 0.9),
             "spells": units_by_threshold(profile, "spells", 0.9),
@@ -52,7 +58,8 @@ def build_profile(player_json: dict):
             "heroEquipment": units_by_threshold(profile, "heroEquipment", 1.0),
         },
         "superActiveTroops": super_active_troops(profile),
-        "superActiveCount": super_active_count(profile),
+        "superActiveCount": super_active_troops_count,
+        "superActiveTroopsCount": super_active_troops_count,
     }
     profile["derived"] = derived
     return profile
