@@ -103,30 +103,65 @@ p {
   font-size: 1.5rem;
 }
 
-.chart {
+.histogram {
   display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: 1fr auto;
+  gap: 0.5rem 0.75rem;
+  align-items: end;
+}
+
+.histogram-y-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  color: var(--muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
+
+.histogram-x-label {
+  grid-column: 2 / -1;
+  justify-self: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
+
+.histogram-bars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
   gap: 0.5rem;
+  align-items: end;
+  min-height: 180px;
+  padding: 0.75rem;
+  background: var(--surface);
+  border-radius: 0.75rem;
 }
 
-.chart-row {
+.histogram-bar {
   display: grid;
-  grid-template-columns: 60px 1fr 40px;
-  gap: 0.75rem;
-  align-items: center;
+  grid-template-rows: auto 1fr auto;
+  align-items: end;
+  gap: 0.35rem;
+  text-align: center;
 }
 
-.chart-bar {
-  height: 12px;
-  background: var(--surface-light);
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.chart-bar span {
-  display: block;
-  height: 100%;
+.histogram-bar-fill {
+  width: 100%;
   background: var(--heat-mid);
-  border-radius: inherit;
+  border-radius: 0.5rem 0.5rem 0 0;
+  min-height: 8px;
+  transition: height 0.2s ease-out;
+}
+
+.histogram-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.histogram-count {
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .table-toolbar {
