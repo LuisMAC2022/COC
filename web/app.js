@@ -51,15 +51,15 @@ const renderThChart = (data) => {
   const distribution = data.aggregates?.thDistribution ?? [];
   const max = Math.max(...distribution.map((item) => item.count), 1);
   distribution.forEach((item) => {
-    const bar = document.createElement("div");
-    bar.className = "histogram-bar";
-    bar.setAttribute("role", "listitem");
-    bar.innerHTML = `
-      <span class="histogram-count">${item.count}</span>
-      <div class="histogram-bar-fill" style="height:${(item.count / max) * 100}%"></div>
-      <span class="histogram-label">TH ${item.th}</span>
+    const row = document.createElement("div");
+    row.className = "chart-row";
+    row.setAttribute("role", "listitem");
+    row.innerHTML = `
+      <span>TH ${item.th}</span>
+      <div class="chart-bar"><span style="width:${(item.count / max) * 100}%"></span></div>
+      <span>${item.count}</span>
     `;
-    chart.appendChild(bar);
+    chart.appendChild(row);
   });
 };
 
