@@ -32,6 +32,34 @@ def top_near_max(profile: Dict, category: str, k: int = 10, threshold: float = 0
     return items[:k]
 
 
+def units_by_threshold(profile: Dict, category: str, threshold: float):
+    items = []
+    for unit in profile.get("categories", {}).get(category, []):
+        level = unit.get("level")
+        max_level = unit.get("maxLevel")
+        value = pct(level, max_level)
+        if value is None or value < threshold:
+            continue
+        items.append(
+            {
+                "name": unit.get("name"),
+                "level": level,
+                "maxLevel": max_level,
+                "pct": round(value, 4),
+            }
+        )
+    items.sort(key=lambda item: (item["pct"], item["level"]), reverse=True)
+    return items
+
+
+def super_active_troops(profile: Dict):
+    return [
+        {"name": unit.get("name"), "level": unit.get("level")}
+        for unit in profile.get("categories", {}).get("troops", [])
+        if unit.get("superActive")
+    ]
+
+
 def super_active_count(profile: Dict) -> int:
     count = 0
     for unit in profile.get("categories", {}).get("troops", []):

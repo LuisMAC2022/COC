@@ -10,9 +10,11 @@ from ..derive import (
     power_index,
     recommend_upgrades,
     super_active_count,
+    super_active_troops,
     top_donors_by_category,
     top_near_max,
     top_units_by_category,
+    units_by_threshold,
 )
 from ..normalize import normalize_player
 
@@ -37,6 +39,19 @@ def build_profile(player_json: dict):
             "heroes": top_near_max(profile, "heroes"),
             "heroEquipment": top_near_max(profile, "heroEquipment"),
         },
+        "nearMaxUnitsByCat": {
+            "troops": units_by_threshold(profile, "troops", 0.9),
+            "spells": units_by_threshold(profile, "spells", 0.9),
+            "heroes": units_by_threshold(profile, "heroes", 0.9),
+            "heroEquipment": units_by_threshold(profile, "heroEquipment", 0.9),
+        },
+        "maxUnitsByCat": {
+            "troops": units_by_threshold(profile, "troops", 1.0),
+            "spells": units_by_threshold(profile, "spells", 1.0),
+            "heroes": units_by_threshold(profile, "heroes", 1.0),
+            "heroEquipment": units_by_threshold(profile, "heroEquipment", 1.0),
+        },
+        "superActiveTroops": super_active_troops(profile),
         "superActiveCount": super_active_count(profile),
     }
     profile["derived"] = derived
