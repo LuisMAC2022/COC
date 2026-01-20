@@ -98,9 +98,42 @@ p {
   border-radius: 0.75rem;
 }
 
+.kpi-card--compact {
+  padding: 0.85rem 1rem;
+}
+
 .kpi-card strong {
   display: block;
   font-size: 1.5rem;
+}
+
+.kpi-inline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: 0.5rem 0.75rem;
+  margin: 0.65rem 0 0;
+}
+
+.kpi-inline-item {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.kpi-inline-item dt {
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.kpi-inline-item abbr {
+  text-decoration: none;
+}
+
+.kpi-inline-item dd {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .histogram {

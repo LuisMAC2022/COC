@@ -20,6 +20,38 @@ const createKpiCard = (label, value, note) => {
   return card;
 };
 
+const createWarStatsCard = (stats) => {
+  const card = document.createElement("div");
+  card.className = "kpi-card kpi-card--compact";
+  const description = document.createElement("span");
+  description.textContent = "Guerra";
+  const list = document.createElement("dl");
+  list.className = "kpi-inline";
+  const addItem = ({ label, value, title }) => {
+    const item = document.createElement("div");
+    item.className = "kpi-inline-item";
+    const term = document.createElement("dt");
+    if (title) {
+      const abbr = document.createElement("abbr");
+      abbr.title = title;
+      abbr.textContent = label;
+      term.appendChild(abbr);
+    } else {
+      term.textContent = label;
+    }
+    const detail = document.createElement("dd");
+    detail.textContent = value;
+    item.appendChild(term);
+    item.appendChild(detail);
+    list.appendChild(item);
+  };
+
+  stats.forEach(addItem);
+  card.appendChild(description);
+  card.appendChild(list);
+  return card;
+};
+
 const renderKpis = (data) => {
   const grid = document.getElementById("kpi-grid");
   grid.innerHTML = "";
@@ -35,14 +67,23 @@ const renderKpis = (data) => {
   const totalWars = canComputeWars ? warWins + warTies + warLosses : null;
   const winRate =
     typeof totalWars === "number" && totalWars > 0 ? formatPct(warWins / totalWars) : "--";
+  const streakValue =
+    typeof clan.warWinStreak === "number" && clan.warWinStreak >= 1
+      ? clan.warWinStreak
+      : null;
+  const warStats = [
+    { label: "Guerras", value: totalWars ?? "--" },
+    { label: "V", value: warWins ?? "--", title: "Victorias" },
+    { label: "D", value: warLosses ?? "--", title: "Derrotas" },
+    { label: "E", value: warTies ?? "--", title: "Empates" },
+    { label: "%", value: winRate, title: "Porcentaje de victorias" },
+  ];
+  if (streakValue !== null) {
+    warStats.push({ label: "Streak", value: streakValue });
+  }
   grid.appendChild(createKpiCard("TH promedio", aggregates.thAvg ?? "--"));
   grid.appendChild(createKpiCard("Miembros", clan.members ?? "--"));
-  grid.appendChild(createKpiCard("Guerras totales", totalWars ?? "--"));
-  grid.appendChild(createKpiCard("Victorias", warWins ?? "--"));
-  grid.appendChild(createKpiCard("% victorias", winRate));
-  grid.appendChild(createKpiCard("Empates", warTies ?? "--"));
-  grid.appendChild(createKpiCard("Derrotas", warLosses ?? "--"));
-  grid.appendChild(createKpiCard("Streak", clan.warWinStreak ?? "--"));
+  grid.appendChild(createWarStatsCard(warStats));
 };
 
 const renderThChart = (data) => {
