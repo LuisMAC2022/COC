@@ -9,6 +9,8 @@ const getHeatClass = (value) => {
   return "";
 };
 
+const getThColor = (th) => `var(--th-${th}, var(--heat-mid))`;
+
 const createKpiCard = (label, value, note) => {
   const card = document.createElement("div");
   card.className = "kpi-card";
@@ -90,15 +92,31 @@ const renderThChart = (data) => {
   const chart = document.getElementById("th-chart");
   chart.innerHTML = "";
   const distribution = data.aggregates?.thDistribution ?? [];
-  const max = Math.max(...distribution.map((item) => item.count), 1);
+  const countsByTh = new Map();
   distribution.forEach((item) => {
+    if (typeof item.th === "number") {
+      countsByTh.set(item.th, item.count ?? 0);
+    }
+  });
+  const thValues = [...countsByTh.keys()];
+  if (!thValues.length) return;
+  const minTh = Math.min(...thValues);
+  const maxTh = Math.max(...thValues);
+  const completeDistribution = [];
+  for (let th = minTh; th <= maxTh; th += 1) {
+    completeDistribution.push({ th, count: countsByTh.get(th) ?? 0 });
+  }
+  const max = Math.max(...completeDistribution.map((item) => item.count), 1);
+  completeDistribution.forEach((item) => {
     const column = document.createElement("div");
-    column.className = "histogram-bar";
+    column.className = `histogram-bar${item.count ? "" : " is-empty"}`;
     column.setAttribute("role", "listitem");
     column.innerHTML = `
       <span class="bar-value">${item.count}</span>
       <div class="bar-area">
-        <span class="bar" style="height:${(item.count / max) * 100}%"></span>
+        <span class="bar" style="height:${(item.count / max) * 100}%; --bar-color:${getThColor(
+          item.th
+        )}"></span>
       </div>
       <span class="bar-label">TH ${item.th}</span>
     `;
