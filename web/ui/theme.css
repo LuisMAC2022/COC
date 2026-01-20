@@ -10,6 +10,16 @@
   --heat-mid: #4f7dff;
   --heat-low: #7ba9ff;
   --coverage-low: #d49a3a;
+  --th-7: #8ed6ff;
+  --th-8: #6bbcff;
+  --th-9: #58a1ff;
+  --th-10: #5f86ff;
+  --th-11: #6b6bff;
+  --th-12: #7b59f0;
+  --th-13: #9b51d3;
+  --th-14: #b24eb3;
+  --th-15: #c24b8f;
+  --th-16: #cf4a62;
 }
 
 * {
@@ -161,12 +171,18 @@ p {
 
 .histogram-bars {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
+  gap: 0;
   align-items: end;
   min-height: 200px;
-  padding: 0.75rem;
+  padding: 0.75rem 0.5rem 0.6rem;
   background: var(--surface);
+  background-image: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.08) 1px,
+    transparent 1px
+  );
+  background-size: 100% 25%;
   border-radius: 0.75rem;
 }
 
@@ -174,7 +190,7 @@ p {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.25rem;
   height: 100%;
 }
 
@@ -182,16 +198,59 @@ p {
   flex: 1;
   display: flex;
   align-items: flex-end;
-  justify-content: center;
+  justify-content: stretch;
   width: 100%;
 }
 
 .bar {
   display: block;
   width: 100%;
-  max-width: 48px;
   background: var(--heat-mid);
   border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.histogram-bar.is-empty .bar {
+  background: transparent;
+}
+
+.histogram-bar[data-th="7"] .bar {
+  background: var(--th-7);
+}
+
+.histogram-bar[data-th="8"] .bar {
+  background: var(--th-8);
+}
+
+.histogram-bar[data-th="9"] .bar {
+  background: var(--th-9);
+}
+
+.histogram-bar[data-th="10"] .bar {
+  background: var(--th-10);
+}
+
+.histogram-bar[data-th="11"] .bar {
+  background: var(--th-11);
+}
+
+.histogram-bar[data-th="12"] .bar {
+  background: var(--th-12);
+}
+
+.histogram-bar[data-th="13"] .bar {
+  background: var(--th-13);
+}
+
+.histogram-bar[data-th="14"] .bar {
+  background: var(--th-14);
+}
+
+.histogram-bar[data-th="15"] .bar {
+  background: var(--th-15);
+}
+
+.histogram-bar[data-th="16"] .bar {
+  background: var(--th-16);
 }
 
 .bar-label,

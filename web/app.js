@@ -89,21 +89,41 @@ const renderKpis = (data) => {
 const renderThChart = (data) => {
   const chart = document.getElementById("th-chart");
   chart.innerHTML = "";
-  const distribution = data.aggregates?.thDistribution ?? [];
-  const max = Math.max(...distribution.map((item) => item.count), 1);
-  distribution.forEach((item) => {
+  const distribution = Array.isArray(data.aggregates?.thDistribution)
+    ? data.aggregates.thDistribution
+    : [];
+  const normalized = distribution
+    .filter((item) => Number.isFinite(item?.th))
+    .map((item) => ({
+      th: Number(item.th),
+      count: Number.isFinite(item.count) ? item.count : 0,
+    }))
+    .sort((a, b) => a.th - b.th);
+
+  if (!normalized.length) return;
+
+  const thMap = new Map(normalized.map((item) => [item.th, item.count]));
+  const thValues = normalized.map((item) => item.th);
+  const minTh = Math.min(...thValues);
+  const maxTh = Math.max(...thValues);
+  const maxCount = Math.max(...normalized.map((item) => item.count), 1);
+
+  for (let th = minTh; th <= maxTh; th += 1) {
+    const count = thMap.get(th) ?? 0;
     const column = document.createElement("div");
-    column.className = "histogram-bar";
+    column.className = `histogram-bar${count === 0 ? " is-empty" : ""}`;
+    column.dataset.th = String(th);
     column.setAttribute("role", "listitem");
+    column.setAttribute("aria-label", `TH ${th}: ${count} jugadores`);
     column.innerHTML = `
-      <span class="bar-value">${item.count}</span>
+      <span class="bar-value">${count}</span>
       <div class="bar-area">
-        <span class="bar" style="height:${(item.count / max) * 100}%"></span>
+        <span class="bar" style="height:${(count / maxCount) * 100}%"></span>
       </div>
-      <span class="bar-label">TH ${item.th}</span>
+      <span class="bar-label">TH ${th}</span>
     `;
     chart.appendChild(column);
-  });
+  }
 };
 
 const renderPlayers = (players) => {
