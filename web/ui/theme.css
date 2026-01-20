@@ -10,6 +10,22 @@
   --heat-mid: #4f7dff;
   --heat-low: #7ba9ff;
   --coverage-low: #d49a3a;
+  --th-1: #cdd5f6;
+  --th-2: #b6d9ff;
+  --th-3: #9fe3ff;
+  --th-4: #7be8e4;
+  --th-5: #65d8b4;
+  --th-6: #7fcd79;
+  --th-7: #a8c85e;
+  --th-8: #d2bd55;
+  --th-9: #e1a95a;
+  --th-10: #e78d5f;
+  --th-11: #e0716a;
+  --th-12: #d55b8a;
+  --th-13: #c053b0;
+  --th-14: #a258d8;
+  --th-15: #8c63f5;
+  --th-16: #6f7aff;
 }
 
 * {
@@ -160,13 +176,18 @@ p {
 }
 
 .histogram-bars {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
-  gap: 0.75rem;
-  align-items: end;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
   min-height: 200px;
   padding: 0.75rem;
   background: var(--surface);
+  background-image: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.08) 1px,
+    transparent 1px
+  );
+  background-size: 100% 20%;
   border-radius: 0.75rem;
 }
 
@@ -176,6 +197,8 @@ p {
   align-items: center;
   gap: 0.35rem;
   height: 100%;
+  flex: 1 0 0;
+  min-width: 48px;
 }
 
 .bar-area {
@@ -189,8 +212,7 @@ p {
 .bar {
   display: block;
   width: 100%;
-  max-width: 48px;
-  background: var(--heat-mid);
+  background: var(--bar-color, var(--heat-mid));
   border-radius: 0.5rem 0.5rem 0 0;
 }
 
@@ -199,6 +221,10 @@ p {
   font-size: 0.75rem;
   color: var(--muted);
   text-align: center;
+}
+
+.histogram-bar.is-empty .bar {
+  height: 0;
 }
 
 .table-toolbar {
