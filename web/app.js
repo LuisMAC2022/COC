@@ -2,11 +2,49 @@ const DATA_PATH = "/backend/outputs/clan_snapshot.json";
 
 const formatPct = (value) => `${Math.round(value * 100)}%`;
 
+const TH_COLOR_TOKENS = {
+  1: "--th-1",
+  2: "--th-2",
+  3: "--th-3",
+  4: "--th-4",
+  5: "--th-5",
+  6: "--th-6",
+  7: "--th-7",
+  8: "--th-8",
+  9: "--th-9",
+  10: "--th-10",
+  11: "--th-11",
+  12: "--th-12",
+  13: "--th-13",
+  14: "--th-14",
+  15: "--th-15",
+  16: "--th-16",
+};
+
 const getHeatClass = (value) => {
   if (value >= 0.98) return "heat-high";
   if (value >= 0.9) return "heat-mid";
   if (value >= 0.75) return "heat-low";
   return "";
+};
+
+const normalizeThDistribution = (distribution) => {
+  const thMap = new Map();
+  distribution.forEach((item) => {
+    if (typeof item.th === "number") {
+      thMap.set(item.th, typeof item.count === "number" ? item.count : 0);
+    }
+  });
+  const thValues = [...thMap.keys()];
+  if (!thValues.length) return [];
+  const minTh = Math.min(...thValues);
+  const maxTh = Math.max(...thValues);
+  const normalized = [];
+  for (let th = minTh; th <= maxTh; th += 1) {
+    const count = thMap.get(th) ?? 0;
+    normalized.push({ th, count });
+  }
+  return normalized;
 };
 
 const createKpiCard = (label, value, note) => {
@@ -89,16 +127,17 @@ const renderKpis = (data) => {
 const renderThChart = (data) => {
   const chart = document.getElementById("th-chart");
   chart.innerHTML = "";
-  const distribution = data.aggregates?.thDistribution ?? [];
+  const distribution = normalizeThDistribution(data.aggregates?.thDistribution ?? []);
+  if (!distribution.length) return;
   const max = Math.max(...distribution.map((item) => item.count), 1);
   distribution.forEach((item) => {
     const column = document.createElement("div");
-    column.className = "histogram-bar";
+    column.className = `histogram-bar${item.count === 0 ? " histogram-bar--empty" : ""}`;
     column.setAttribute("role", "listitem");
     column.innerHTML = `
       <span class="bar-value">${item.count}</span>
       <div class="bar-area">
-        <span class="bar" style="height:${(item.count / max) * 100}%"></span>
+        <span class="bar" style="height:${(item.count / max) * 100}%;--bar-color: var(${TH_COLOR_TOKENS[item.th] || "--heat-mid"});"></span>
       </div>
       <span class="bar-label">TH ${item.th}</span>
     `;
